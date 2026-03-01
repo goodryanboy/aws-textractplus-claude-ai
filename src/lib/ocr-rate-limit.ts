@@ -1,6 +1,6 @@
 import { Redis } from "@upstash/redis";
 
-const OCR_LIMIT = 3;
+const OCR_LIMIT = 30;
 const OCR_COUNT_KEY = "trakie:ocr_request_count";
 
 let redis: Redis | null = null;
