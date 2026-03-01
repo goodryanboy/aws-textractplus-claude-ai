@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trakie — Cannabis Invoice OCR Pipeline
+
+A Next.js application for dispensary staff to upload cannabis invoices, extract product data via AWS Textract, refine with Claude AI, and sync to METRC (compliance) and Dutchie (POS).
+
+## Features
+
+- **AWS Textract OCR** — Extracts line items (name, SKU, quantity, price) from invoices
+- **Claude AI** — Intelligent parsing, normalization, and SKU inference
+- **METRC Integration** — Cannabis compliance sync (mock/demo mode without credentials)
+- **Dutchie Integration** — POS inventory sync (mock/demo mode without credentials)
+- **Premium Dashboard** — Dark theme, editable verification table, toast notifications
+
+## Tech Stack
+
+- Next.js 16, TypeScript, Tailwind CSS, Material UI, Zod
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `AWS_ACCESS_KEY_ID` | For real OCR | AWS credentials for Textract |
+| `AWS_SECRET_ACCESS_KEY` | For real OCR | AWS credentials |
+| `AWS_REGION` | No | Default: `us-west-2` |
+| `ANTHROPIC_API_KEY` | For Claude | Anthropic API key |
+| `UPSTASH_REDIS_REST_URL` | For rate limit | Upstash Redis URL (or `KV_REST_API_URL`) |
+| `UPSTASH_REDIS_REST_TOKEN` | For rate limit | Upstash Redis token (or `KV_REST_API_TOKEN`) |
+| `METRC_VENDOR_KEY` | For METRC | METRC vendor API key |
+| `METRC_USER_KEY` | For METRC | METRC user API key |
+| `DUTCHIE_LOCATION_KEY` | For Dutchie | Dutchie location key |
+| `DUTCHIE_INTEGRATOR_KEY` | For Dutchie | Dutchie integrator key |
 
-## Learn More
+**Demo mode:** Without AWS/Anthropic keys, the app returns sample invoice data for presentation.
 
-To learn more about Next.js, take a look at the following resources:
+**OCR rate limit:** Max 30 requests. Add Redis (Upstash or Vercel KV) via Vercel Marketplace for persistent limit on deploy. Without Redis, uses in-memory counter (resets on cold start).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── api/ocr/      # AWS Textract
+│   ├── api/parse/    # Claude refinement
+│   ├── api/metrc/    # METRC sync
+│   └── api/dutchie/  # Dutchie sync
+├── components/      # UploadZone, DataVerificationTable, etc.
+├── lib/             # textract, claude, metrc, dutchie clients
+└── types/
+```
